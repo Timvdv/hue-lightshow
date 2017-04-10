@@ -1,13 +1,26 @@
 <div class="container">
 
     <div class="row timeline">
+        <div class="color-circle" [style.left.px]="timeline.circle_offset">
+            <div class="card">
+                <div class="card-block">
+                    <h4 class="card-title">Select a color</h4>
+                    <h6 class="card-subtitle mb-2 text-muted">Create the perfect lightshow</h6>
+                    <p class="card-text">
+                        <input [(colorPicker)]="color" [style.background]="color" [value]="color"/>
+                    </p>
+                    <button class="btn btn-primary">Add new light effect</button>
+                </div>
+            </div>
+        </div>
+
         <div class="col">
             <div id="waveform" #waveform></div>
         </div>
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-1">
+        <div class="col-1 video-controller">
             <button class="btn btn-lg btn-primary play" (click)="play()" *ngIf="state === TimelineState.PAUSE">
                 Play
             </button>

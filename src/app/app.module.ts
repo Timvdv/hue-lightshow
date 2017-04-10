@@ -6,6 +6,8 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import { TimelineComponent } from './timeline/timeline.component';
 
+import { ColorPickerModule } from 'angular2-color-picker';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -14,7 +16,8 @@ import { TimelineComponent } from './timeline/timeline.component';
   imports: [
     BrowserModule,
     FormsModule,
-    HttpModule
+    HttpModule,
+    ColorPickerModule,
   ],
   providers: [
     { provide: 'Window',  useValue: window }
