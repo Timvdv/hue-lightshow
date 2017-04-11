@@ -12,12 +12,18 @@ export class TimelineComponent implements AfterViewInit {
     state: TimelineState = TimelineState.PAUSE;
     TimelineState = TimelineState;
     timelineCounter: number = 0;
+    color: string = "#1abc9c";
+    cardState: boolean = true;
 
     timeline: any = {
         duration: null,
         width: null,
         circle_offset: 0
     }
+
+    dots: any[] = [];
+
+    //TODO: Array maken met color dots. append aan de array door klik
 
     @ViewChild('waveform') elementRef: ElementRef;
 
@@ -31,7 +37,7 @@ export class TimelineComponent implements AfterViewInit {
     ngAfterViewInit() {
         this.wavesurfer = this.window.WaveSurfer.create({
             container: this.elementRef.nativeElement,
-            waveColor: '#1abc9c'
+            waveColor: this.color
         });
 
         this.wavesurfer.load('../assets/audio/cheerleader.mp3');
@@ -46,10 +52,7 @@ export class TimelineComponent implements AfterViewInit {
         });
 
         this.wavesurfer.on('seek', (current_percentage) => {
-            console.log('percentage: ', current_percentage);
-
             current_percentage = this.timeline.width * current_percentage;
-
             this.updateOffsetByPercentage(current_percentage);
         });
     }
@@ -73,6 +76,23 @@ export class TimelineComponent implements AfterViewInit {
     pause() {
         this.state = TimelineState.PAUSE;
         this.wavesurfer.pause();
+    }
+
+    newEffect() {
+        this.dots.push({
+            circle_offset: this.timeline.circle_offset,
+            color: this.color
+        })
+    }
+
+    openCard(event) {
+        if(event.target.classList && event.target.classList[0] === "color-circle") {
+            this.cardState = true;
+        }
+    }
+
+    closeCard() {
+        this.cardState = false;
     }
 
 }

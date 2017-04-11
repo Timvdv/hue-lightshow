@@ -24,7 +24,7 @@ button {
     border-radius: 9999px;
     background: $main-color;
     padding: 0;
-    transition: .1s all;
+    transition: .1s opacity;
     cursor: pointer;
 
     .card {
