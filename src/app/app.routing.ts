@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { HomeComponent } from './home/home.component';
 import { TimelineComponent } from './timeline/timeline.component';
+import { NotfoundComponent } from './notfound/notfound.component';
 
 const appRoutes: Routes = [
     {
@@ -16,6 +17,10 @@ const appRoutes: Routes = [
     {
         path: 'lightshow',
         component: TimelineComponent,
+    },
+    {
+        path: '**',
+        component: NotfoundComponent
     }
 ];
 

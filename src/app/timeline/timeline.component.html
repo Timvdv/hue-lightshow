@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container-fluid timeline-header">
     <header class="row">
         <div class="col">
             <h1 class="main-title">
@@ -15,8 +15,8 @@
         </div>
 
         <div class="color-circle" [style.left.px]="timeline.circle_offset" [style.background]="color" [style.opacity]="state === TimelineState.PAUSE ? 1 : 0" (click)="openCard($event)">
-            <div class="card">
-                <div class="card-block" *ngIf="cardState">
+            <div class="card" *ngIf="cardState">
+                <div class="card-block" >
                     <h4 class="card-title">Select a color</h4>
                     <h6 class="card-subtitle mb-2 text-muted">Create the perfect lightshow</h6>
                     <p class="card-text">

@@ -8,26 +8,29 @@ import { routing } from './app.routing';
 import { AppComponent } from './app.component';
 import { TimelineComponent } from './timeline/timeline.component';
 
+import { HueService } from './hue.service';
+
 import { ColorPickerModule } from 'angular2-color-picker';
 import { HomeComponent } from './home/home.component';
-
-
+import { NotfoundComponent } from './notfound/notfound.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TimelineComponent,
-    HomeComponent
+    HomeComponent,
+    NotfoundComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
     routing,
-    ColorPickerModule,
+    ColorPickerModule
   ],
   providers: [
-    { provide: 'Window',  useValue: window }
+    { provide: 'Window',  useValue: window },
+    HueService
   ],
   bootstrap: [ AppComponent ]
 })

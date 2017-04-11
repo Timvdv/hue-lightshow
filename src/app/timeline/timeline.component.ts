@@ -23,8 +23,6 @@ export class TimelineComponent implements AfterViewInit {
 
     dots: any[] = [];
 
-    //TODO: Array maken met color dots. append aan de array door klik
-
     @ViewChild('waveform') elementRef: ElementRef;
 
     constructor(
@@ -37,7 +35,8 @@ export class TimelineComponent implements AfterViewInit {
     ngAfterViewInit() {
         this.wavesurfer = this.window.WaveSurfer.create({
             container: this.elementRef.nativeElement,
-            waveColor: this.color
+            waveColor: this.color,
+            progressColor: "#43f3d0"
         });
 
         this.wavesurfer.load('../assets/audio/cheerleader.mp3');
@@ -81,8 +80,38 @@ export class TimelineComponent implements AfterViewInit {
     newEffect() {
         this.dots.push({
             circle_offset: this.timeline.circle_offset,
-            color: this.color
-        })
+            color: this.color,
+            time: this.wavesurfer.getCurrentTime()
+        });
+
+        this.calculatePoints();
+    }
+
+    calculatePoints() {
+        this.wavesurfer.clearRegions();
+
+        this.dots.filter( (el) => {
+            return el.end > el.start
+        });
+
+        for (var i = 0; i < this.dots.length; i++) {
+            let current_dot = this.dots[i];
+            let next_dot = this.dots[i + 1];
+
+            let color: string = this.convertHex(this.dots[i].color, 30 );
+
+            let end_time = next_dot ? next_dot.time : this.wavesurfer.getDuration();
+
+            this.wavesurfer.addRegion({
+                start: current_dot.time,
+                end: end_time,
+                color: color,
+                resize: false,
+                drag: false,
+            });
+        }
+
+
     }
 
     openCard(event) {
@@ -93,6 +122,15 @@ export class TimelineComponent implements AfterViewInit {
 
     closeCard() {
         this.cardState = false;
+    }
+
+    convertHex(hex,opacity): string {
+        hex = hex.replace('#','');
+        let r = parseInt(hex.substring(0,2), 16);
+        let g = parseInt(hex.substring(2,4), 16);
+        let b = parseInt(hex.substring(4,6), 16);
+        let result = 'rgba('+r+','+g+','+b+','+opacity/100+')';
+        return result;
     }
 
 }
