@@ -1,5 +1,6 @@
 import { Component, AfterViewInit, Inject, ViewChild, ElementRef, NgZone } from '@angular/core';
 import TimelineState from './timeline-state';
+import { HueService } from '../hue.service';
 
 @Component({
   selector: 'app-timeline',
@@ -27,7 +28,8 @@ export class TimelineComponent implements AfterViewInit {
 
     constructor(
         @Inject('Window') window: any,
-        public zone: NgZone
+        public zone: NgZone,
+        private hueService: HueService
     ) {
         this.window = window;
     }
@@ -54,6 +56,15 @@ export class TimelineComponent implements AfterViewInit {
             current_percentage = this.timeline.width * current_percentage;
             this.updateOffsetByPercentage(current_percentage);
         });
+
+        this.wavesurfer.on('region-in', (region: any) => {
+            let rgba_array = region.color.slice(5,region.color.length - 1).split(",");
+            this.setLights(rgba_array);
+        });
+    }
+
+    setLights(color) {
+        this.hueService.setColor(color);
     }
 
     updateOffsetByPercentage(current_percentage) {
@@ -90,15 +101,27 @@ export class TimelineComponent implements AfterViewInit {
     calculatePoints() {
         this.wavesurfer.clearRegions();
 
-        this.dots.filter( (el) => {
-            return el.end > el.start
+        let sort = ( (el, next) => {
+            let el_start = Math.round(el.circle_offset);
+            let next_start = Math.round(next.circle_offset);
+
+            if (el_start < next_start)
+                return -1;
+            if (el_start > next_start)
+                return 1;
+
+            return 0;
         });
 
-        for (var i = 0; i < this.dots.length; i++) {
-            let current_dot = this.dots[i];
-            let next_dot = this.dots[i + 1];
+        let sorted_dots = this.dots.sort(sort);
 
-            let color: string = this.convertHex(this.dots[i].color, 30 );
+        console.log(sorted_dots);
+
+        for (var i = 0; i < sorted_dots.length; i++) {
+            let current_dot = sorted_dots[i];
+            let next_dot = sorted_dots[i + 1];
+
+            let color: string = this.convertHex(sorted_dots[i].color, 30 );
 
             let end_time = next_dot ? next_dot.time : this.wavesurfer.getDuration();
 
@@ -110,8 +133,6 @@ export class TimelineComponent implements AfterViewInit {
                 drag: false,
             });
         }
-
-
     }
 
     openCard(event) {

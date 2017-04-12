@@ -30,6 +30,16 @@ export class HueService {
         .catch(this.handleError);
     }
 
+    setColor(color: any): Promise<any> {
+        let body = {"on":true,"bri":240,"sat":200,"hue":0};
+
+        return this.http
+            .put(this.api_url + "groups/0", JSON.stringify(body))
+            .toPromise()
+            .then(res => res.json())
+            .catch(this.handleError);
+    }
+
     private handleError(error: any): Promise<any> {
         console.error('An error occurred', error); // for demo purposes only
         return Promise.reject(error.message || error);
