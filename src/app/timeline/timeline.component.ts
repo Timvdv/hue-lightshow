@@ -67,6 +67,16 @@ export class TimelineComponent implements AfterViewInit {
         this.hueService.setColor(color);
     }
 
+    removeDot(event) {
+        let i = 0;
+        var parent = event.target.parentNode;
+        var index = Array.prototype.indexOf.call(parent.children, event.target);
+
+        this.dots.splice(index, 1);
+
+        this.calculatePoints();
+    }
+
     updateOffsetByPercentage(current_percentage) {
         this.zone.run(() => this.timeline.circle_offset = current_percentage);
     }
@@ -101,21 +111,7 @@ export class TimelineComponent implements AfterViewInit {
     calculatePoints() {
         this.wavesurfer.clearRegions();
 
-        let sort = ( (el, next) => {
-            let el_start = Math.round(el.circle_offset);
-            let next_start = Math.round(next.circle_offset);
-
-            if (el_start < next_start)
-                return -1;
-            if (el_start > next_start)
-                return 1;
-
-            return 0;
-        });
-
-        let sorted_dots = this.dots.sort(sort);
-
-        console.log(sorted_dots);
+        let sorted_dots = this.sortDots();
 
         for (var i = 0; i < sorted_dots.length; i++) {
             let current_dot = sorted_dots[i];
@@ -133,6 +129,22 @@ export class TimelineComponent implements AfterViewInit {
                 drag: false,
             });
         }
+    }
+
+    sortDots() {
+        let sort = ( (el, next) => {
+            let el_start = Math.round(el.circle_offset);
+            let next_start = Math.round(next.circle_offset);
+
+            if (el_start < next_start)
+                return -1;
+            if (el_start > next_start)
+                return 1;
+
+            return 0;
+        });
+
+        return this.dots.sort(sort);
     }
 
     openCard(event) {

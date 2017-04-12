@@ -11,7 +11,7 @@
 <div class="container">
     <div class="row timeline">
         <div class="color-circle-container">
-            <div class="color-circle" *ngFor="let item of dots" [style.left.px]="item.circle_offset" [style.background]="item.color"></div>
+            <div class="color-circle" *ngFor="let item of dots" [style.left.px]="item.circle_offset" [style.background]="item.color" (click)="removeDot($event)"></div>
         </div>
 
         <div class="color-circle main-circle" [style.left.px]="timeline.circle_offset" [style.background]="color" [style.opacity]="state === TimelineState.PAUSE ? 1 : 0" (click)="openCard($event)">

@@ -33,6 +33,8 @@ button {
     background: $main-color;
     padding: 0;
     transition: .1s opacity;
+    cursor: pointer;
+    z-index: 9999;
 
     .card {
         width: 400px;
@@ -44,6 +46,5 @@ button {
         width: 30px;
         height: 30px;
         top: -30px;
-        cursor: pointer;
     }
 }
