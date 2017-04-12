@@ -13,13 +13,15 @@ import { HueService } from './hue.service';
 import { ColorPickerModule } from 'angular2-color-picker';
 import { HomeComponent } from './home/home.component';
 import { NotfoundComponent } from './notfound/notfound.component';
+import { HeaderComponent } from './header/header.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TimelineComponent,
     HomeComponent,
-    NotfoundComponent
+    NotfoundComponent,
+    HeaderComponent
   ],
   imports: [
     BrowserModule,

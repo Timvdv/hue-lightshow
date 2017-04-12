@@ -2,10 +2,12 @@
 
 .container-fluid {
     background: $main-color;
-    padding: 60px;
+    padding: 20px 0;
     margin: 0;
     text-align: center;
     color: white;
+    overflow: hidden;
+    opacity: .8;
 }
 
 button {
@@ -20,7 +22,7 @@ button {
 }
 
 .timeline {
-    margin-top: 100px;
+    margin-top: 150px;
 }
 
 .color-circle {
