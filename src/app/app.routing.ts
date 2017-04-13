@@ -2,7 +2,7 @@ import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { HomeComponent } from './home/home.component';
-import { TimelineComponent } from './timeline/timeline.component';
+import { CreateComponent } from './create/create.component';
 import { NotfoundComponent } from './notfound/notfound.component';
 
 const appRoutes: Routes = [
@@ -12,11 +12,11 @@ const appRoutes: Routes = [
     },
     {
         path: 'bridge',
-        component: TimelineComponent,
+        component: CreateComponent,
     },
     {
         path: 'lightshow',
-        component: TimelineComponent,
+        component: CreateComponent,
     },
     {
         path: '**',

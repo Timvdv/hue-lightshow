@@ -1,15 +1,5 @@
 @import '../shared/scss/global.scss';
 
-.container-fluid {
-    background: $main-color;
-    padding: 20px 0;
-    margin: 0;
-    text-align: center;
-    color: white;
-    overflow: hidden;
-    opacity: .8;
-}
-
 button {
     cursor: pointer;
 }
