@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { TimelineComponent } from './timeline/timeline.component';
 
 import { HueService } from './hue.service';
+import { JamendoService } from './shared/services/jamendo.service';
 
 import { ColorPickerModule } from 'angular2-color-picker';
 import { HomeComponent } from './home/home.component';
@@ -36,7 +37,8 @@ import { MusicComponent } from './music/music.component';
   ],
   providers: [
     { provide: 'Window',  useValue: window },
-    HueService
+    HueService,
+    JamendoService
   ],
   bootstrap: [ AppComponent ]
 })

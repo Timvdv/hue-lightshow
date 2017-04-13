@@ -9,4 +9,5 @@
     <app-header></app-header>
 </div>
 
-<app-timeline></app-timeline>
+<app-music *ngIf="!mp3" [mp3]="mp3" (mp3Picked)="showTimeline($event)"></app-music>
+<app-timeline *ngIf="mp3" [mp3]="mp3"></app-timeline>

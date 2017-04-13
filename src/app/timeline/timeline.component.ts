@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Inject, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, Inject, ViewChild, ElementRef, NgZone, Input } from '@angular/core';
 import TimelineState from './timeline-state';
 import { HueService } from '../hue.service';
 
@@ -7,7 +7,7 @@ import { HueService } from '../hue.service';
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.scss']
 })
-export class TimelineComponent implements AfterViewInit {
+export class TimelineComponent implements AfterViewInit, OnDestroy {
     wavesurfer: any;
     window: any;
     state: TimelineState = TimelineState.PAUSE;
@@ -15,6 +15,7 @@ export class TimelineComponent implements AfterViewInit {
     timelineCounter: number = 0;
     color: string = "#1abc9c";
     cardState: boolean = true;
+    @Input() mp3: string;
 
     timeline: any = {
         duration: null,
@@ -38,14 +39,20 @@ export class TimelineComponent implements AfterViewInit {
         this.wavesurfer = this.window.WaveSurfer.create({
             container: this.elementRef.nativeElement,
             waveColor: this.color,
+            barWidth: 2,
             progressColor: "#43f3d0"
         });
 
-        this.wavesurfer.load('../assets/audio/cheerleader.mp3');
+        //this.wavesurfer.load('../assets/audio/cheerleader.mp3');
+        this.wavesurfer.load(this.mp3);
 
         this.wavesurfer.on('ready', () => {
             this.timeline.duration = this.wavesurfer.getDuration();
             this.timeline.width = this.elementRef.nativeElement.clientWidth;
+        });
+
+        this.wavesurfer.on('waveform-ready', (data) => {
+            console.log(data);
         });
 
         this.wavesurfer.on('audioprocess', (current_time) => {
@@ -61,6 +68,11 @@ export class TimelineComponent implements AfterViewInit {
             let rgba_array = region.color.slice(5,region.color.length - 1).split(",");
             this.setLights(rgba_array);
         });
+    }
+
+    ngOnDestroy() {
+        this.wavesurfer.unAll();
+        this.wavesurfer.stop();
     }
 
     setLights(color) {

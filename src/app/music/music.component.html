@@ -1,3 +1,22 @@
-<p>
-  music works!
-</p>
+<div class="container">
+    <div class="row">
+        <h3>
+            Pick your favourite song
+        </h3>
+        <span>
+            All music provided is <a href="https://www.jamendo.com/">Royalty free</a> music, all rights included
+        </span>
+        <div class="col-12">
+            <input type="text" class="form-control" [value]="search" placeholder="Search for music" (keyup)="searchMusic($event)">
+        </div>
+        <div class="col-12">
+            <div class="pick-a-song" *ngIf="songs">
+                <ul class="list-group">
+                    <li class="list-group-item list-group-item-action" *ngFor="let song of songs" (click)="selectSong(song)">
+                        {{ song.name }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

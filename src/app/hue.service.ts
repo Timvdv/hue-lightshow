@@ -6,8 +6,8 @@ import 'rxjs/add/operator/toPromise';
 export class HueService {
     window: any;
 
-    //bridge_ip: string = "http://10.0.1.2/";
-    bridge_ip: string = "http://145.24.218.128:8080/";
+    bridge_ip: string = "http://10.0.1.2/";
+    //bridge_ip: string = "http://145.24.218.128:8080/";
     //bridge_ip: string = "http://192.168.1.3/";
 
     username: string = "newdeveloper"
@@ -47,7 +47,7 @@ export class HueService {
         // let hue = Math.round( rgb[0] * 100000 );
         // console.log(saturation, hue);
 
-        let body = { "on":true, "xy":cie };
+        let body = { "on":true, "xy":[Math.round(cie[0] * 100) / 100, Math.round(cie[1] * 100) / 100,] };
 
         return this.http
             .put(this.api_url + "groups/0/action", JSON.stringify(body))
