@@ -14,6 +14,8 @@ import { ColorPickerModule } from 'angular2-color-picker';
 import { HomeComponent } from './home/home.component';
 import { NotfoundComponent } from './notfound/notfound.component';
 import { HeaderComponent } from './header/header.component';
+import { CreateComponent } from './create/create.component';
+import { MusicComponent } from './music/music.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +23,9 @@ import { HeaderComponent } from './header/header.component';
     TimelineComponent,
     HomeComponent,
     NotfoundComponent,
-    HeaderComponent
+    HeaderComponent,
+    CreateComponent,
+    MusicComponent
   ],
   imports: [
     BrowserModule,
