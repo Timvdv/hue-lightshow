@@ -12,9 +12,10 @@ export class CreateComponent implements OnInit {
   mp3: string;
 
   ngOnInit() {
+    this.mp3 = "../assets/audio/cheerleader.mp3";
   }
 
   showTimeline(event) {
-      this.mp3 = event;
+    this.mp3 = event;
   }
 }

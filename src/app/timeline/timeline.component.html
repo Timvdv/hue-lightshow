@@ -1,10 +1,11 @@
+<div id="wave-spectrogram"></div>
 <div class="container">
     <div class="row timeline">
         <div class="color-circle-container">
             <div class="color-circle" *ngFor="let item of dots" [style.left.px]="item.circle_offset" [style.background]="item.color" (click)="removeDot($event)"></div>
         </div>
 
-        <div class="color-circle main-circle" [style.left.px]="timeline.circle_offset" [style.background]="color" [style.opacity]="state === TimelineState.PAUSE ? 1 : 0" (click)="openCard($event)">
+        <div class="color-circle main-circle" [style.left.px]="timeline.circle_offset" [style.background]="state === TimelineState.PAUSE ? color : playColor" (click)="openCard($event)">
             <div class="card" *ngIf="cardState">
                 <div class="card-block" >
                     <h4 class="card-title">Select a color</h4>

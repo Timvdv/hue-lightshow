@@ -14,7 +14,9 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     TimelineState = TimelineState;
     timelineCounter: number = 0;
     color: string = "#1abc9c";
+    playColor: string = "#1abc9c";
     cardState: boolean = true;
+
     @Input() mp3: string;
 
     timeline: any = {
@@ -24,6 +26,7 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     }
 
     dots: any[] = [];
+    previousRegion: number = null;
 
     @ViewChild('waveform') elementRef: ElementRef;
 
@@ -40,19 +43,26 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
             container: this.elementRef.nativeElement,
             waveColor: this.color,
             barWidth: 2,
-            progressColor: "#43f3d0"
+            progressColor: "#43f3d0",
+            normalize: true
         });
 
-        //this.wavesurfer.load('../assets/audio/cheerleader.mp3');
         this.wavesurfer.load(this.mp3);
 
         this.wavesurfer.on('ready', () => {
+
             this.timeline.duration = this.wavesurfer.getDuration();
             this.timeline.width = this.elementRef.nativeElement.clientWidth;
-        });
 
-        this.wavesurfer.on('waveform-ready', (data) => {
-            console.log(data);
+            let l = Math.round(this.wavesurfer.getDuration());
+
+            for (var i = 0; i < l; i = i + 1) {
+                let j = i + 1;
+
+                let previousRegion = this.previousRegion ? this.previousRegion : j;
+
+                this.generateLightshow( i, j );
+            }
         });
 
         this.wavesurfer.on('audioprocess', (current_time) => {
@@ -65,18 +75,70 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
         });
 
         this.wavesurfer.on('region-in', (region: any) => {
-            let rgba_array = region.color.slice(5,region.color.length - 1).split(",");
-            this.setLights(rgba_array);
+            this.hueService.setColor(region.color);
+            this.playColor = region.color.slice(0, region.color.length - 3) + "1)";
         });
+    }
+
+    generateLightshow(from, to) {
+
+        // Gaat nog iets mis met previousRegion
+        //console.log(from, to);
+
+        var nominalWidth = Math.round(
+            this.wavesurfer.getDuration() * this.wavesurfer.params.minPxPerSec * this.wavesurfer.params.pixelRatio
+        );
+
+        let p = this.wavesurfer.backend.getPeaks(nominalWidth, from, to);
+
+        this.previousRegion = to;
+
+        for (var i = p.length - 1; i >= 0; i--) {
+            let val = Math.round(p[i] * 100);
+
+            if( val > 10 ) {
+
+                let region_color = 'hsla('+ (360/val*10) +', 50%, 45%, .3)';
+
+                // Needed to remove doubles
+                if(this.wavesurfer.regions && this.wavesurfer.regions.list) {
+                    let added_region = this.wavesurfer.regions.list;
+
+                    for ( var i=0, len=added_region.length; i < len; i++ ) {
+                        if( added_region[i]['start'] == from || added_region[i]['color'] == region_color ) {
+                            console.log(added_region[i]['color']);
+                            return;
+                        }
+                    }
+                }
+
+                // Add the region to wavesurfer
+                let region = this.wavesurfer.addRegion({
+                    start: from,
+                    end: to,
+                    color: region_color,
+                    resize: false,
+                    drag: false,
+                });
+
+                this.previousRegion = null;
+
+                //NOT SURE WHAT HAPPENS BUT SHIT GETS RLLY SLOW WHEN UNCOMMENT
+                // let dot = {
+                //     circle_offset: region.wrapper.offsetLeft,
+                //     color: region.color,
+                //     time: region.start,
+                //     end: region.end
+                // }
+
+                // this.newEffect(dot)
+            }
+        }
     }
 
     ngOnDestroy() {
         this.wavesurfer.unAll();
         this.wavesurfer.stop();
-    }
-
-    setLights(color) {
-        this.hueService.setColor(color);
     }
 
     removeDot(event) {
@@ -110,12 +172,19 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
         this.wavesurfer.pause();
     }
 
-    newEffect() {
-        this.dots.push({
+    newEffect(addObject) {
+        let dot = {
             circle_offset: this.timeline.circle_offset,
             color: this.color,
-            time: this.wavesurfer.getCurrentTime()
-        });
+            time: this.wavesurfer.getCurrentTime(),
+            end: this.wavesurfer.getCurrentTime() + 3
+        }
+
+        if(addObject) {
+            dot = addObject;
+        }
+
+        this.dots.push(dot);
 
         this.calculatePoints();
     }
@@ -123,22 +192,18 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     calculatePoints() {
         this.wavesurfer.clearRegions();
 
-        let sorted_dots = this.sortDots();
+        //let sorted_dots = this.sortDots();
+        let sorted_dots = this.dots;
 
         for (var i = 0; i < sorted_dots.length; i++) {
             let current_dot = sorted_dots[i];
-            let next_dot = sorted_dots[i + 1];
-
-            let color: string = this.convertHex(sorted_dots[i].color, 30 );
-
-            let end_time = next_dot ? next_dot.time : this.wavesurfer.getDuration();
 
             this.wavesurfer.addRegion({
                 start: current_dot.time,
-                end: end_time,
-                color: color,
-                resize: false,
-                drag: false,
+                end: sorted_dots[i].end,
+                color: current_dot.color,
+                resize: true,
+                drag: true,
             });
         }
     }
@@ -167,15 +232,6 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
 
     closeCard() {
         this.cardState = false;
-    }
-
-    convertHex(hex,opacity): string {
-        hex = hex.replace('#','');
-        let r = parseInt(hex.substring(0,2), 16);
-        let g = parseInt(hex.substring(2,4), 16);
-        let b = parseInt(hex.substring(4,6), 16);
-        let result = 'rgba('+r+','+g+','+b+','+opacity/100+')';
-        return result;
     }
 
 }

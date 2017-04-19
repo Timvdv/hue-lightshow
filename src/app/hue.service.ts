@@ -2,18 +2,13 @@ import { Injectable, Inject } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import 'rxjs/add/operator/toPromise';
 
+import { api_url } from '../env';
+
 @Injectable()
 export class HueService {
     window: any;
-
-    bridge_ip: string = "http://10.0.1.2/";
-    //bridge_ip: string = "http://145.24.218.128:8080/";
-    //bridge_ip: string = "http://192.168.1.3/";
-
-    username: string = "newdeveloper"
-    //username: string = "UTZXYbUA3t6iCeXhjRV5mORC703q6UJToYw4M24o"
-
-    api_url: string = this.bridge_ip + 'api/' + this.username + '/';
+    effect: string = null;
+    alert: string = null;
 
     constructor(
         @Inject('Window') window: any,
@@ -25,7 +20,7 @@ export class HueService {
     create(name: string): Promise<any> {
       let app_body
       return this.http
-        .post(this.api_url, JSON.stringify({name: name}))
+        .post(api_url, JSON.stringify({name: name}))
         .toPromise()
         .then(res => console.log(res.json()))
         .catch(this.handleError);
@@ -33,35 +28,69 @@ export class HueService {
 
     getLights(): Promise<any> {
       return this.http
-        .get(this.api_url + "lights")
+        .get(api_url + "lights")
         .toPromise()
         .then(res => res.json())
         .catch(this.handleError);
     }
 
+    previousCall: any = null;
+
     setColor(color: any): Promise<any> {
+        // Parse first HSLA value to int
+        let h = Math.round(parseInt(color.split("(")[1].split(',')[0]));
+        let s = color.split(',')[1];
+        let l = color.split(',')[2];
 
-        let cie = this.window.rgb_to_cie(color[0], color[1], color[2]);
+        // Regions come in HSL color
+        let hsl_to_rgb = this.window.colorcolor("hsl("+ h + "," + s + "," + l + ")", "rgba");
 
-        // let saturation = rgb[0];//(Math.round(rgb[1] * 254));
-        // let hue = Math.round( rgb[0] * 100000 );
-        // console.log(saturation, hue);
+        let rgb_array = hsl_to_rgb.slice(5, hsl_to_rgb.length).split(',');
 
-        let body = { "on":true, "xy":[Math.round(cie[0] * 100) / 100, Math.round(cie[1] * 100) / 100,] };
+        // Convert HSL into something Philips Hue understands
+        let cie = this.window.rgb_to_cie(rgb_array[0], rgb_array[1], rgb_array[2]);
+
+        if(cie && (cie[0] === 0 || this.previousCall == cie)) {
+            return;
+        }
+
+        this.previousCall = cie;
+
+        let body: any = {
+            "on":true,
+            "xy":[Math.round(cie[0] * 100) / 100, Math.round(cie[1] * 100) / 100,],
+            "transitiontime": 0
+        };
+
+        if( this.effect ) {
+            body.effect = this.effect;
+        }
+
+        if( this.alert ) {
+            body.alert = this.alert;
+        }
 
         return this.http
-            .put(this.api_url + "groups/0/action", JSON.stringify(body))
+            //.put(this.api_url + "groups/0/action", JSON.stringify(body))
+            .put(api_url + "lights/7/state", JSON.stringify(body))
             .toPromise()
             .then(res => res.json())
             .catch(this.handleError);
     }
 
     colorLoop() {
-        // {"effect":"colorloop"}
+        this.alert = null;
+        this.effect = "colorloop";
     }
 
     blink() {
-        // {"alert":"select"}
+        this.effect = null;
+        this.alert = "select";
+    }
+
+    noEffect() {
+        this.effect = null;
+        this.alert = null;
     }
 
     private handleError(error: any): Promise<any> {
