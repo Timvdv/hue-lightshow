@@ -6,13 +6,19 @@ button {
 
 .video-controller {
     button {
-        margin-top: 50px;
+        margin-bottom: 20px;
         padding: 10px 50px;
     }
 }
 
 .timeline {
-    margin-top: 150px;
+    position: relative;
+    margin-top: 100px;
+    margin-bottom: 20px;
+}
+
+#colorPickerInput {
+    color: white;
 }
 
 .color-circle {

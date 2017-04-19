@@ -1,37 +1,71 @@
-<div id="wave-spectrogram"></div>
 <div class="container">
     <div class="row timeline">
         <div class="color-circle-container">
             <div class="color-circle" *ngFor="let item of dots" [style.left.px]="item.circle_offset" [style.background]="item.color" (click)="removeDot($event)"></div>
         </div>
 
-        <div class="color-circle main-circle" [style.left.px]="timeline.circle_offset" [style.background]="state === TimelineState.PAUSE ? color : playColor" (click)="openCard($event)">
-            <div class="card" *ngIf="cardState">
-                <div class="card-block" >
-                    <h4 class="card-title">Select a color</h4>
-                    <h6 class="card-subtitle mb-2 text-muted">Create the perfect lightshow</h6>
-                    <p class="card-text">
-                        <input [(colorPicker)]="color" [style.background]="color" [value]="color"/>
-                    </p>
-                    <button class="btn btn-primary" (click)="newEffect()">Add new light effect</button>
-                    <button class="btn" (click)="closeCard()">Close</button>
-                </div>
-            </div>
-        </div>
+        <div class="color-circle main-circle" [style.left.px]="timeline.circle_offset" [style.background]="state === TimelineState.PAUSE ? color : playColor" (click)="openCard($event)"></div>
 
         <div class="col">
             <div id="waveform" #waveform></div>
         </div>
     </div>
 
-    <div class="row justify-content-center">
-        <div class="col-1 video-controller">
-            <button class="btn btn-lg btn-primary play" (click)="play()" *ngIf="state === TimelineState.PAUSE">
-                Play
-            </button>
-            <button class="btn btn-lg btn-primary pause" (click)="pause()" *ngIf="state === TimelineState.PLAY">
-                Pause
-            </button>
+    <div class="row justify-content-end">
+        <div class="col-2 video-controller">
+            <button class="btn btn-lg btn-primary play" (click)="play()" *ngIf="state === TimelineState.PAUSE"> Play </button>
+            <button class="btn btn-lg btn-primary pause" (click)="pause()" *ngIf="state === TimelineState.PLAY"> Pause </button>
+        </div>
+    </div>
+
+    <div class="jumbotron">
+        <h1 class="display-8">
+            Customize
+        </h1>
+        <p class="lead">
+            Create the perfect lightshow
+        </p>
+
+        <hr class="my-4">
+
+        <!--
+        <div class="lights-container" *ngIf="lights">
+            <div class="light" *ngFor="let light of lights">
+                {{light.name}}
+            </div>
+        </div>
+        -->
+
+        <div class="row">
+            <div class="form-group col-3">
+                <label for="colorPickerInput">Select a color</label>
+                <input [(colorPicker)]="color" [style.background]="color" [value]="color" class="form-control" id="colorPickerInput"/>
+            </div>
+
+            <div class="form-group col-12">
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="noeffect" [checked]="effect == 'noeffect' ? 'checked' : ''"> No effect
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="alarm" [checked]="effect == 'alarm' ? 'checked' : ''"> alarm
+                    </label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="colorloop" [checked]="effect == 'colorloop' ? 'checked' : ''"> colorloop
+                    </label>
+                </div>
+            </div>
+
+
+            <hr class="my-4">
+
+            <div class="form-group col-3">
+                <button class="btn btn-primary" (click)="newEffect()">Add new light effect</button>
+            </div>
         </div>
     </div>
 </div>

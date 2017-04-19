@@ -17,6 +17,7 @@ import { NotfoundComponent } from './notfound/notfound.component';
 import { HeaderComponent } from './header/header.component';
 import { CreateComponent } from './create/create.component';
 import { MusicComponent } from './music/music.component';
+import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { MusicComponent } from './music/music.component';
     NotfoundComponent,
     HeaderComponent,
     CreateComponent,
-    MusicComponent
+    MusicComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,

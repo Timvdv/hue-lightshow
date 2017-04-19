@@ -36,14 +36,19 @@ export class HueService {
 
     previousCall: any = null;
 
-    setColor(color: any, lightId: number): Promise<any> {
+    hslToRgbString(color) {
         // Parse first HSLA value to int
         let h = Math.round(parseInt(color.split("(")[1].split(',')[0]));
         let s = color.split(',')[1];
         let l = color.split(',')[2];
 
         // Regions come in HSL color
-        let hsl_to_rgb = this.window.colorcolor("hsl("+ h + "," + s + "," + l + ")", "rgba");
+        return this.window.colorcolor("hsl("+ h + "," + s + "," + l + ")", "rgba");
+    }
+
+    setColor(color: any, lightId: number): Promise<any> {
+
+        let hsl_to_rgb = this.hslToRgbString(color);
         let rgb_array = hsl_to_rgb.slice(5, hsl_to_rgb.length).split(',');
 
         // Convert HSL into something Philips Hue understands
@@ -62,7 +67,7 @@ export class HueService {
         };
 
         if( this.effect ) {
-            body.effect = this.effect;
+            //body.effect = this.effect;
         }
 
         if( this.alert ) {
@@ -70,7 +75,7 @@ export class HueService {
         }
 
         return this.http
-            //.put(this.api_url + "groups/0/action", JSON.stringify(body))
+            //.put(this.api_url + "groups/0/action", JSON.stringify(body)) // Group state is slower
             .put(api_url + "lights/"+ lightId +"/state", JSON.stringify(body))
             .toPromise()
             .then(res => res.json())

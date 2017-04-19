@@ -12,7 +12,8 @@ export class CreateComponent implements OnInit {
   mp3: string;
 
   ngOnInit() {
-    this.mp3 = "../assets/audio/cheerleader.mp3";
+    // Uncomment when debugging timeline
+    // this.mp3 = "../assets/audio/cheerleader.mp3";
   }
 
   showTimeline(event) {

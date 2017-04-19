@@ -13,10 +13,13 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     state: TimelineState = TimelineState.PAUSE;
     TimelineState = TimelineState;
     timelineCounter: number = 0;
+
+    cardState: boolean = true;
     color: string = "#1abc9c";
     playColor: string = "#1abc9c";
-    cardState: boolean = true;
     lights: any = [];
+    effects: string[] = ['alarm', 'colorloop', 'noeffect'];
+    effect: string = "noeffect";
 
     @Input() mp3: string;
 
@@ -69,22 +72,35 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
             this.updateOffsetByPercentage(current_percentage);
         });
 
+        this.wavesurfer.on('region-click', (region: any) => {
+            this.effect = region.data.effect;
+
+            let hsl_to_rgba = this.hueService.hslToRgbString(region.data.colors[0]);
+            this.color = this.window.colorcolor(hsl_to_rgba, 'hex');
+        });
+
         this.wavesurfer.on('region-in', (region: any) => {
 
             switch (region.data.effect) {
-                case "alarm":
+                case this.effects[0]:
                     this.hueService.blink();
                     break;
-                case "colorloop":
+                case this.effects[1]:
                     this.hueService.colorLoop();
                     break;
-                case "noeffect":
+                case this.effects[2]:
                     this.hueService.noEffect();
                     break;
             }
 
-            // @TODO: add light ID to region
-            this.hueService.setColor(region.color, 1);
+            //for (var i = 0; i < this.lights.length; ++i) {
+                this.hueService.setColor(region.color, 1);
+            //}
+
+            this.effect = region.data.effect;
+
+            let hsl_to_rgba = this.hueService.hslToRgbString(region.data.colors[0]);
+            this.color = this.window.colorcolor(hsl_to_rgba, 'hex');
 
             this.playColor = region.color.slice(0, region.color.length - 3) + "1)";
         });
@@ -136,8 +152,7 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
                     }
                 }
 
-                let effects = ['alarm', 'colorloop', 'noeffect'];
-                let effect = Math.floor(Math.random() * effects.length);
+                let effect = Math.floor(Math.random() * this.effects.length);
 
                 let colors = [ region_color ];
 
@@ -150,16 +165,15 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
                     start: from,
                     end: to,
                     color: region_color,
-                    resize: false,
-                    drag: false,
+                    resize: true,
+                    drag: true,
                     data: {
-                        effect: effect,
-                        colors: []
+                        effect: this.effects[effect],
+                        colors: colors
                     }
                 });
 
                 this.previousRegion = to;
-
             }
         }
     }
