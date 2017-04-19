@@ -16,6 +16,7 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     color: string = "#1abc9c";
     playColor: string = "#1abc9c";
     cardState: boolean = true;
+    lights: any = [];
 
     @Input() mp3: string;
 
@@ -26,7 +27,7 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     }
 
     dots: any[] = [];
-    previousRegion: number = null;
+    previousRegion: number = 0;
 
     @ViewChild('waveform') elementRef: ElementRef;
 
@@ -39,6 +40,8 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit() {
+        this.getDefaultLights();
+
         this.wavesurfer = this.window.WaveSurfer.create({
             container: this.elementRef.nativeElement,
             waveColor: this.color,
@@ -54,15 +57,7 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
             this.timeline.duration = this.wavesurfer.getDuration();
             this.timeline.width = this.elementRef.nativeElement.clientWidth;
 
-            let l = Math.round(this.wavesurfer.getDuration());
-
-            for (var i = 0; i < l; i = i + 1) {
-                let j = i + 1;
-
-                let previousRegion = this.previousRegion ? this.previousRegion : j;
-
-                this.generateLightshow( i, j );
-            }
+            this.generateLightshow();
         });
 
         this.wavesurfer.on('audioprocess', (current_time) => {
@@ -75,23 +70,53 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
         });
 
         this.wavesurfer.on('region-in', (region: any) => {
-            this.hueService.setColor(region.color);
+
+            switch (region.data.effect) {
+                case "alarm":
+                    this.hueService.blink();
+                    break;
+                case "colorloop":
+                    this.hueService.colorLoop();
+                    break;
+                case "noeffect":
+                    this.hueService.noEffect();
+                    break;
+            }
+
+            // @TODO: add light ID to region
+            this.hueService.setColor(region.color, 1);
+
             this.playColor = region.color.slice(0, region.color.length - 3) + "1)";
         });
     }
 
-    generateLightshow(from, to) {
+    ngOnDestroy() {
+        this.wavesurfer.unAll();
+        this.wavesurfer.stop();
+    }
 
-        // Gaat nog iets mis met previousRegion
-        //console.log(from, to);
+    getDefaultLights() {
+        this.hueService.getLights().then( (lights) => {
+            this.lights = lights;
+        });
+    }
+
+    generateLightshow() {
+        let l = Math.round(this.wavesurfer.getDuration());
+
+        for (var i = 1; i < l; i++) {
+            let previousRegion = (this.previousRegion || this.previousRegion == 0) ? this.previousRegion : i + 1;
+            this.generateLightshowPart( previousRegion, i );
+        }
+    }
+
+    generateLightshowPart(from, to) {
 
         var nominalWidth = Math.round(
             this.wavesurfer.getDuration() * this.wavesurfer.params.minPxPerSec * this.wavesurfer.params.pixelRatio
         );
 
         let p = this.wavesurfer.backend.getPeaks(nominalWidth, from, to);
-
-        this.previousRegion = to;
 
         for (var i = p.length - 1; i >= 0; i--) {
             let val = Math.round(p[i] * 100);
@@ -106,10 +131,18 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
 
                     for ( var i=0, len=added_region.length; i < len; i++ ) {
                         if( added_region[i]['start'] == from || added_region[i]['color'] == region_color ) {
-                            console.log(added_region[i]['color']);
                             return;
                         }
                     }
+                }
+
+                let effects = ['alarm', 'colorloop', 'noeffect'];
+                let effect = Math.floor(Math.random() * effects.length);
+
+                let colors = [ region_color ];
+
+                for (var i = 1; i < this.lights.length; i++) {
+                    colors.push( 'hsla('+ ( 360/val * (10 + i) ) +', 50%, 45%, .3)' )
                 }
 
                 // Add the region to wavesurfer
@@ -119,26 +152,16 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
                     color: region_color,
                     resize: false,
                     drag: false,
+                    data: {
+                        effect: effect,
+                        colors: []
+                    }
                 });
 
-                this.previousRegion = null;
+                this.previousRegion = to;
 
-                //NOT SURE WHAT HAPPENS BUT SHIT GETS RLLY SLOW WHEN UNCOMMENT
-                // let dot = {
-                //     circle_offset: region.wrapper.offsetLeft,
-                //     color: region.color,
-                //     time: region.start,
-                //     end: region.end
-                // }
-
-                // this.newEffect(dot)
             }
         }
-    }
-
-    ngOnDestroy() {
-        this.wavesurfer.unAll();
-        this.wavesurfer.stop();
     }
 
     removeDot(event) {

@@ -36,7 +36,7 @@ export class HueService {
 
     previousCall: any = null;
 
-    setColor(color: any): Promise<any> {
+    setColor(color: any, lightId: number): Promise<any> {
         // Parse first HSLA value to int
         let h = Math.round(parseInt(color.split("(")[1].split(',')[0]));
         let s = color.split(',')[1];
@@ -44,13 +44,12 @@ export class HueService {
 
         // Regions come in HSL color
         let hsl_to_rgb = this.window.colorcolor("hsl("+ h + "," + s + "," + l + ")", "rgba");
-
         let rgb_array = hsl_to_rgb.slice(5, hsl_to_rgb.length).split(',');
 
         // Convert HSL into something Philips Hue understands
         let cie = this.window.rgb_to_cie(rgb_array[0], rgb_array[1], rgb_array[2]);
 
-        if(cie && (cie[0] === 0 || this.previousCall == cie)) {
+        if(cie && (cie[0] === 0 || this.previousCall === cie)) {
             return;
         }
 
@@ -72,7 +71,7 @@ export class HueService {
 
         return this.http
             //.put(this.api_url + "groups/0/action", JSON.stringify(body))
-            .put(api_url + "lights/7/state", JSON.stringify(body))
+            .put(api_url + "lights/"+ lightId +"/state", JSON.stringify(body))
             .toPromise()
             .then(res => res.json())
             .catch(this.handleError);
