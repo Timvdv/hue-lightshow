@@ -3,6 +3,7 @@
     "node_modules/codelyzer"
   ],
   "rules": {
+    "allowUnreachableCode": true,
     "callable-types": true,
     "class-name": true,
     "comment-format": [

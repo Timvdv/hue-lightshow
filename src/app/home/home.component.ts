@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterContentInit } from '@angular/core';
 import { Router } from '@angular/router';
+import LinkButtonState from './link-button.state';
 
 import { HueService } from '../hue.service';
 
@@ -9,22 +10,69 @@ import { HueService } from '../hue.service';
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
-  constructor(
-      private router: Router,
-      private hueService: HueService
-      ) { }
+    state: LinkButtonState = LinkButtonState.NORMAL;
+    LinkButtonState = LinkButtonState;
+    countdown: number;
+
+    constructor(
+        private router: Router,
+        private hueService: HueService
+    ) { }
+
+    bridge: any;
+    username: string = null;
 
     ngOnInit() {
-
+        this.countdown = 30;
     }
 
     connectToBridge() {
-        this.hueService.getLights().then(lala => {
-            console.log(lala)
+        this.state = LinkButtonState.LOADING;
+        this.hueService.findBridge().then( (bridge) => {
+            if(bridge && bridge.length) {
+                this.bridge = bridge[0];
+                this.state = LinkButtonState.WAITFORLINK;
+                this.createUser();
+            }
         });
+    }
 
-        this.router.navigate(['/lightshow']);
+    createUser() {
+        this.hueService.ceateUser(this.bridge.internalipaddress, {"devicetype": "hue lightshow#browser"}).then( (response) => {
 
-        let body = {"devicetype": "my_hue_app#iphone peter"};
+            if(response && response.length) {
+                response = response[0];
+            }
+
+            if(response.success) {
+                this.state = LinkButtonState.SUCCESS;
+                this.username = response.success.username;
+
+                localStorage.setItem('username', this.username);
+                localStorage.setItem('brigde_ip', this.bridge.internalipaddress);
+
+                //Set userdata because localstorage is changed
+                this.hueService.setUserData();
+
+                setTimeout( () => {
+                    this.router.navigate(['/lightshow']);
+                }, 1000);
+
+            } else if (response.error) {
+                if(response.error.description === "link button not pressed") {
+                    if(this.countdown == 0) {
+                        this.state = LinkButtonState.FAILED;
+                        return;
+                    }
+
+                    this.countdown--;
+
+                    setTimeout( () => {
+
+                        this.createUser();
+                    }, 1000);
+                }
+            }
+        });
     }
 }

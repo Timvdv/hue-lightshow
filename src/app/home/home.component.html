@@ -8,8 +8,20 @@
 
         <div class="row justify-content-center">
             <div class="col-4">
-                <div class="btn btn-lg btn-primary btn-bridge" (click)="connectToBridge()">
+                <div class="btn btn-lg btn-primary btn-bridge" (click)="connectToBridge()" *ngIf="state === LinkButtonState.NORMAL">
                     Connect your bridge
+                </div>
+                <div class="btn btn-lg btn-primary btn-bridge disabled" *ngIf="state === LinkButtonState.LOADING">
+                    Searching for bridge...
+                </div>
+                <div class="btn btn-lg btn-primary btn-bridge disabled" *ngIf="state === LinkButtonState.WAITFORLINK">
+                    Please press the link button ({{countdown}})
+                </div>
+                <div class="btn btn-lg btn-primary btn-bridge" (click)="connectToBridge()" *ngIf="state === LinkButtonState.FAILED">
+                    Link failed, try again
+                </div>
+                <div class="btn btn-lg btn-success btn-bridge" *ngIf="state === LinkButtonState.SUCCESS">
+                    Bridge found, redirecting to lightshow
                 </div>
             </div>
         </div>

@@ -9,12 +9,27 @@ export class HueService {
     window: any;
     effect: string = null;
     alert: string = null;
+    previousCall: any = null;
+    api_url: string = null;
 
     constructor(
         @Inject('Window') window: any,
         private http: Http
     ) {
         this.window = window;
+
+        // IF debugging, use env file bridge
+        // this.api_url = api_url;
+        this.setUserData();
+    }
+
+    setUserData() {
+        let username = localStorage.getItem('username');
+        let bridge = localStorage.getItem('bridge_ip');
+
+        if(username && bridge) {
+            this.api_url = "http://" + bridge + "/api/" + username + "/"
+        }
     }
 
     create(name: string): Promise<any> {
@@ -33,8 +48,6 @@ export class HueService {
         .then(res => res.json())
         .catch(this.handleError);
     }
-
-    previousCall: any = null;
 
     hslToRgbString(color) {
         // Parse first HSLA value to int
@@ -95,6 +108,22 @@ export class HueService {
     noEffect() {
         this.effect = null;
         this.alert = null;
+    }
+
+    findBridge(): Promise<any> {
+        return this.http
+            .get("https://www.meethue.com/api/nupnp")
+            .toPromise()
+            .then(res => res.json())
+            .catch(this.handleError);
+    }
+
+    ceateUser(bridge_ip, user) {
+        return this.http
+            .post("http://" + bridge_ip + "/api", JSON.stringify(user))
+            .toPromise()
+            .then(res => res.json())
+            .catch(this.handleError);
     }
 
     private handleError(error: any): Promise<any> {

@@ -45,26 +45,27 @@
             <div class="form-group col-12">
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="noeffect" [checked]="effect == 'noeffect' ? 'checked' : ''"> No effect
+                        <input class="form-check-input" type="radio" [(ngModel)]="effect" name="inlineRadioOptions" id="inlineRadio1" value="noeffect" [checked]="effect == 'noeffect' ? 'checked' : ''"> No effect
                     </label>
                 </div>
                 <div class="form-check form-check-inline">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="alarm" [checked]="effect == 'alarm' ? 'checked' : ''"> alarm
+                        <input class="form-check-input" type="radio" [(ngModel)]="effect" name="inlineRadioOptions" id="inlineRadio2" value="alarm" [checked]="effect == 'alarm' ? 'checked' : ''"> alarm
                     </label>
                 </div>
-                <div class="form-check form-check-inline">
+                <div class="form-check form-check-inline disabled">
                     <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="colorloop" [checked]="effect == 'colorloop' ? 'checked' : ''"> colorloop
+                        <input class="form-check-input " disabled type="radio" [(ngModel)]="effect" name="inlineRadioOptions" id="inlineRadio3" value="colorloop" [checked]="effect == 'colorloop' ? 'checked' : ''"> colorloop
                     </label>
                 </div>
             </div>
 
-
             <hr class="my-4">
 
-            <div class="form-group col-3">
-                <button class="btn btn-primary" (click)="newEffect()">Add new light effect</button>
+            <div class="form-group col-12">
+                <button class="btn btn-primary" *ngIf="!regionState" (click)="addRegion()">Add new light effect</button>
+                <button class="btn btn-primary" *ngIf="regionState" (click)="editRegion()">Edit light effect</button>
+                <button class="btn btn-danger" *ngIf="regionState" (click)="removeRegion()">Remove</button>
             </div>
         </div>
     </div>

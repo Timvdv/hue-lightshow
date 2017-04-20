@@ -2,6 +2,15 @@ import { Component, AfterViewInit, OnDestroy, Inject, ViewChild, ElementRef, NgZ
 import TimelineState from './timeline-state';
 import { HueService } from '../hue.service';
 
+interface Region {
+    start: number,
+    end: number,
+    color: string,
+    resize: boolean,
+    drag: boolean,
+    data: any
+}
+
 @Component({
   selector: 'app-timeline',
   templateUrl: './timeline.component.html',
@@ -14,6 +23,7 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     TimelineState = TimelineState;
     timelineCounter: number = 0;
 
+    regionState: boolean = false;
     cardState: boolean = true;
     color: string = "#1abc9c";
     playColor: string = "#1abc9c";
@@ -27,6 +37,18 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
         duration: null,
         width: null,
         circle_offset: 0
+    }
+
+    region: Region = {
+        start: null,
+        end: null,
+        color: this.color,
+        resize: true,
+        drag: true,
+        data: {
+            effect: this.effects[0],
+            colors: []
+        }
     }
 
     dots: any[] = [];
@@ -70,16 +92,19 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
         this.wavesurfer.on('seek', (current_percentage) => {
             current_percentage = this.timeline.width * current_percentage;
             this.updateOffsetByPercentage(current_percentage);
+
+            if(this.getRegionKey()) {
+                this.regionState = true;
+            } else {
+                this.regionState = false;
+            }
         });
 
         this.wavesurfer.on('region-click', (region: any) => {
-            this.effect = region.data.effect;
-
-            let hsl_to_rgba = this.hueService.hslToRgbString(region.data.colors[0]);
-            this.color = this.window.colorcolor(hsl_to_rgba, 'hex');
+            this.setRegion(region);
         });
 
-        this.wavesurfer.on('region-in', (region: any) => {
+        this.wavesurfer.on('region-in', (region: Region) => {
 
             switch (region.data.effect) {
                 case this.effects[0]:
@@ -93,22 +118,37 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
                     break;
             }
 
-            //for (var i = 0; i < this.lights.length; ++i) {
-                this.hueService.setColor(region.color, 1);
-            //}
+            //Tmp: light id's instead of this.lights
+            // let light_ids = [1, 4, 8];
+            let light_ids = [7, 5, 3];
 
-            this.effect = region.data.effect;
+            for (var i = 0; i < light_ids.length; ++i) {
+                this.hueService.setColor(region.color, light_ids[i]);
+            }
 
-            let hsl_to_rgba = this.hueService.hslToRgbString(region.data.colors[0]);
-            this.color = this.window.colorcolor(hsl_to_rgba, 'hex');
+            this.setRegion(region);
 
-            this.playColor = region.color.slice(0, region.color.length - 3) + "1)";
+            this.regionState = true;
+        });
+
+        this.wavesurfer.on('region-out', (region: Region) => {
+            this.regionState = false;
         });
     }
 
     ngOnDestroy() {
         this.wavesurfer.unAll();
         this.wavesurfer.stop();
+    }
+
+    setRegion(region: Region) {
+        let hsl_to_rgba = this.hueService.hslToRgbString(region.data.colors[0]);
+
+        this.region = region;
+
+        this.effect = region.data.effect;
+        this.color = this.window.colorcolor(hsl_to_rgba, 'hex');
+        this.playColor = region.color.slice(0, region.color.length - 3) + "1)";
     }
 
     getDefaultLights() {
@@ -120,8 +160,18 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
     generateLightshow() {
         let l = Math.round(this.wavesurfer.getDuration());
 
-        for (var i = 1; i < l; i++) {
-            let previousRegion = (this.previousRegion || this.previousRegion == 0) ? this.previousRegion : i + 1;
+        let incrementer = 1;
+
+        if(l > 200) {
+            incrementer = 2;
+        }
+
+        if(l > 300) {
+            incrementer = 3;
+        }
+
+        for (var i = 1; i < l; i = i + incrementer) {
+            let previousRegion = (this.previousRegion || this.previousRegion == 0) ? this.previousRegion : i + incrementer;
             this.generateLightshowPart( previousRegion, i );
         }
     }
@@ -156,8 +206,8 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
 
                 let colors = [ region_color ];
 
-                for (var i = 1; i < this.lights.length; i++) {
-                    colors.push( 'hsla('+ ( 360/val * (10 + i) ) +', 50%, 45%, .3)' )
+                for (let color_i = 1; color_i < this.lights.length; color_i++) {
+                    colors.push( 'hsla('+ ( 360/val * (10 + i * 10) ) +', 50%, 45%, .3)' )
                 }
 
                 // Add the region to wavesurfer
@@ -178,14 +228,66 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    removeDot(event) {
-        let i = 0;
-        var parent = event.target.parentNode;
-        var index = Array.prototype.indexOf.call(parent.children, event.target);
+    getRegionKey(): boolean|string {
+        let current = this.wavesurfer.getCurrentTime();
 
-        this.dots.splice(index, 1);
+        for (var key in this.wavesurfer.regions.list) {
 
-        this.calculatePoints();
+            if (!this.wavesurfer.regions.list.hasOwnProperty(key)) continue;
+
+            var current_region = this.wavesurfer.regions.list[key];
+
+            if( this.region.start == current_region.start ) {
+                return key;
+            }
+        }
+
+        return false;
+    }
+
+    removeRegion() {
+        let regionKey = this.getRegionKey();
+
+        if(regionKey) {
+            this.wavesurfer.regions.list[regionKey.toString()].remove();
+            this.regionState = false;
+        }
+    }
+
+    setColor() {
+        let color = this.window.colorcolor(this.color, 'hsla');
+        color = color.slice(0,color.length - 2) + ".3)";
+        return color;
+    }
+
+    editRegion() {
+        let regionKey = this.getRegionKey();
+
+        if(regionKey) {
+
+            let color = this.setColor();
+            let colors = [ color ];
+            for (let color_i = 1; color_i < this.lights.length; color_i++) {
+                colors.push( color )
+            }
+
+            let region = this.wavesurfer.regions.list[regionKey.toString()];
+
+            this.wavesurfer.regions.list[regionKey.toString()].remove();
+
+            // Add the region to wavesurfer
+            this.wavesurfer.addRegion({
+                start: region.start,
+                end: region.end,
+                color: color,
+                resize: true,
+                drag: true,
+                data: {
+                    effect: this.effect,
+                    colors: colors
+                }
+            });
+        }
     }
 
     updateOffsetByPercentage(current_percentage) {
@@ -209,56 +311,32 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
         this.wavesurfer.pause();
     }
 
-    newEffect(addObject) {
+    addRegion() {
         let dot = {
             circle_offset: this.timeline.circle_offset,
-            color: this.color,
+            color: this.setColor(),
             time: this.wavesurfer.getCurrentTime(),
             end: this.wavesurfer.getCurrentTime() + 3
         }
 
-        if(addObject) {
-            dot = addObject;
+        let colors = [ dot.color ];
+
+        for (let color_i = 1; color_i < this.lights.length; color_i++) {
+            colors.push( dot.color )
         }
 
-        this.dots.push(dot);
-
-        this.calculatePoints();
-    }
-
-    calculatePoints() {
-        this.wavesurfer.clearRegions();
-
-        //let sorted_dots = this.sortDots();
-        let sorted_dots = this.dots;
-
-        for (var i = 0; i < sorted_dots.length; i++) {
-            let current_dot = sorted_dots[i];
-
-            this.wavesurfer.addRegion({
-                start: current_dot.time,
-                end: sorted_dots[i].end,
-                color: current_dot.color,
-                resize: true,
-                drag: true,
-            });
-        }
-    }
-
-    sortDots() {
-        let sort = ( (el, next) => {
-            let el_start = Math.round(el.circle_offset);
-            let next_start = Math.round(next.circle_offset);
-
-            if (el_start < next_start)
-                return -1;
-            if (el_start > next_start)
-                return 1;
-
-            return 0;
+        // Add the region to wavesurfer
+        let region = this.wavesurfer.addRegion({
+            start: dot.time,
+            end: dot.end,
+            color: dot.color,
+            resize: true,
+            drag: true,
+            data: {
+                effect: this.effect,
+                colors: colors
+            }
         });
-
-        return this.dots.sort(sort);
     }
 
     openCard(event) {
