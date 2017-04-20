@@ -20,10 +20,20 @@ export class HomeComponent implements OnInit {
     ) { }
 
     bridge: any;
+    bridgeFound: boolean = false;
     username: string = null;
 
     ngOnInit() {
         this.countdown = 30;
+    }
+
+    checkBridges() {
+        let username = localStorage.getItem('username');
+        let bridge = localStorage.getItem('bridge_ip');
+
+        if(username && bridge) {
+            this.bridgeFound = true;
+        }
     }
 
     connectToBridge() {
