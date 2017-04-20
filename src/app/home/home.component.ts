@@ -49,7 +49,7 @@ export class HomeComponent implements OnInit {
                 this.username = response.success.username;
 
                 localStorage.setItem('username', this.username);
-                localStorage.setItem('brigde_ip', this.bridge.internalipaddress);
+                localStorage.setItem('bridge_ip', this.bridge.internalipaddress);
 
                 //Set userdata because localstorage is changed
                 this.hueService.setUserData();

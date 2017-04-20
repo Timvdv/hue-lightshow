@@ -14,8 +14,9 @@ export class CreateComponent implements OnInit {
   ngOnInit() {
     // Uncomment when debugging timeline
     // this.mp3 = "../assets/audio/cheerleader.mp3";
-    this.mp3 = "../assets/audio/LilWayne.mp3";
+    // this.mp3 = "../assets/audio/LilWayne.mp3";
     // this.mp3 = "../assets/audio/spaceman.mp3";
+    this.mp3 = "../assets/audio/lights.mp3";
   }
 
   showTimeline(event) {

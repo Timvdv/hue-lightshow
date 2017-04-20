@@ -120,7 +120,7 @@ export class TimelineComponent implements AfterViewInit, OnDestroy {
 
             //Tmp: light id's instead of this.lights
             // let light_ids = [1, 4, 8];
-            let light_ids = [7, 5, 3];
+            let light_ids = [1, 7, 5, 3];
 
             for (var i = 0; i < light_ids.length; ++i) {
                 this.hueService.setColor(region.color, light_ids[i]);

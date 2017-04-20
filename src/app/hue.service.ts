@@ -10,7 +10,7 @@ export class HueService {
     effect: string = null;
     alert: string = null;
     previousCall: any = null;
-    api_url: string = null;
+    apiUrl: string = null;
 
     constructor(
         @Inject('Window') window: any,
@@ -28,14 +28,16 @@ export class HueService {
         let bridge = localStorage.getItem('bridge_ip');
 
         if(username && bridge) {
-            this.api_url = "http://" + bridge + "/api/" + username + "/"
+            this.apiUrl = "http://" + bridge + "/api/" + username + "/"
+        } else {
+            alert('Cannot set userdata, something went wrong');
         }
     }
 
     create(name: string): Promise<any> {
       let app_body
       return this.http
-        .post(api_url, JSON.stringify({name: name}))
+        .post(this.apiUrl, JSON.stringify({name: name}))
         .toPromise()
         .then(res => console.log(res.json()))
         .catch(this.handleError);
@@ -43,7 +45,7 @@ export class HueService {
 
     getLights(): Promise<any> {
       return this.http
-        .get(api_url + "lights")
+        .get(this.apiUrl + "lights")
         .toPromise()
         .then(res => res.json())
         .catch(this.handleError);
@@ -88,26 +90,26 @@ export class HueService {
         }
 
         return this.http
-            //.put(this.api_url + "groups/0/action", JSON.stringify(body)) // Group state is slower
-            .put(api_url + "lights/"+ lightId +"/state", JSON.stringify(body))
+            //.put(this.apiUrl + "groups/0/action", JSON.stringify(body)) // Group state is slower
+            .put(this.apiUrl + "lights/"+ lightId +"/state", JSON.stringify(body))
             .toPromise()
             .then(res => res.json())
             .catch(this.handleError);
     }
 
     colorLoop() {
-        this.alert = null;
+        this.alert = "none";
         this.effect = "colorloop";
     }
 
     blink() {
         this.effect = null;
-        this.alert = "select";
+        this.alert = "lselect";
     }
 
     noEffect() {
         this.effect = null;
-        this.alert = null;
+        this.alert = "none";
     }
 
     findBridge(): Promise<any> {
