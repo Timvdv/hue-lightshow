@@ -19,8 +19,20 @@ export class HueService {
         this.window = window;
 
         // IF debugging, use env file bridge
-        // this.api_url = api_url;
-        this.setUserData();
+        // this.apiUrl = api_url;
+        this.setUserDataInit();
+    }
+
+    // TMP: blugh
+    setUserDataInit() {
+        let username = localStorage.getItem('username');
+        let bridge = localStorage.getItem('bridge_ip');
+
+        if(username && bridge) {
+            this.apiUrl = "http://" + bridge + "/api/" + username + "/"
+        } else {
+            // alert('Cannot set userdata, something went wrong');
+        }
     }
 
     setUserData() {

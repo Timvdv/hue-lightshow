@@ -8,7 +8,7 @@
 
         <div class="row justify-content-center">
             <div class="col-12">
-                <p class="welcome-back">
+                <p class="welcome-back" *ngIf="bridgeFound">
                     Looks like you've been here before. <br> a bridge has been found!
                     <a [routerLink]="['/lightshow']">Create lightshow</a>
                 </p>

@@ -11,5 +11,5 @@ A project Innovative Tech project for the Hogeschool Rotterdam
 - [ ] Improve color algorithm
 - [ ] Select which lights to control per region
 - [ ] More userfriendly way to edit regions
-- [ ] Save regions to database, and share with others
+- [ ] Save regions to database, and share with others (probably with login etc..)
 - [ ] Fix colorloop effect, its disabled right now

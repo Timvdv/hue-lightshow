@@ -25,6 +25,7 @@ export class HomeComponent implements OnInit {
 
     ngOnInit() {
         this.countdown = 30;
+        this.checkBridges();
     }
 
     checkBridges() {
@@ -78,7 +79,6 @@ export class HomeComponent implements OnInit {
                     this.countdown--;
 
                     setTimeout( () => {
-
                         this.createUser();
                     }, 1000);
                 }
